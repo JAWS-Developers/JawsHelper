@@ -13,5 +13,8 @@
     "@inquirer/prompts": "^5.0.4",
     "ora": "^5.4.1",
     "semver": "^7.6.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
   }
 }

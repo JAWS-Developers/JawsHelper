@@ -2,7 +2,13 @@ const { exec } = require('child_process');
 const semver = require('semver');
 const { select } = require('@inquirer/prompts');
 const ora = require('ora'); // Import the 'ora' package
+const { log } = require('console');
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
+  
 /**
  * Options to choose for the release
  * @type {[{name: string, value: string},{name: string, value: string},{name: string, value: string},{name: string, value: string},{name: string, value: string},null,null]}
@@ -83,7 +89,12 @@ const AnalyzeFolder = async () => {
         return new Promise((resolve, reject) => {
             exec('git status', (error, stdout, stderr) => {
                 if (error) {
-                    gitSpinner.fail('Git status unavailable');
+                    const errorMessage = error.toString();
+                    if (errorMessage.includes('CMD.EXE') && errorMessage.includes('UNC')) {
+                        gitSpinner.fail('Source can\'t be in a network folder');
+                    } else {
+                        gitSpinner.fail('Git status unavailable');
+                    }
                     resolve(false);
                 } else {
                     gitSpinner.succeed('Git repository found');
@@ -91,7 +102,7 @@ const AnalyzeFolder = async () => {
                 }
             });
         });
-    }
+    };
 
     /**
      * Execute the two functions and returns the values
@@ -127,16 +138,16 @@ const processInput = async () => {
             console.log(`Current version: ${currentVersion}`); // Informative message
 
             const newVersion = semver.inc(currentVersion, releaseType);
+            const version = ora('Updating version...').start();
 
             confirmUpdate(newVersion)
                 .then(confirmed => {
                     if (confirmed) {
                         // Update version in package.json
                         exec(`npm version ${newVersion}`, (err, stdout, stderr) => {
-                            if (err) {
-                                console.error(err);
-                                return;
-                            }
+                            console.log(err.message);
+                            
+
                             console.log(`Version updated to: ${newVersion}`);
 
                             const commit = ora("Commit").start();
