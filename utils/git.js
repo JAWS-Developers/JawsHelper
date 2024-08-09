@@ -75,7 +75,7 @@ const checkGitClean = () => {
                 spinner.fail(`Error checking Git status: ${error.message}`);
                 resolve(false);
             } else if (stdout) {
-                spinner.fail('Git working directory not clean.');
+                spinner.fail(`Git working directory not clean: ${stdout}`);
                 resolve(false);
             } else {
                 spinner.succeed('Git working directory is clean.');
