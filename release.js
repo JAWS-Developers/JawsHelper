@@ -6,9 +6,9 @@ const { log } = require('console');
 const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
-  });
+});
 
-  
+
 /**
  * Options to choose for the release
  * @type {[{name: string, value: string},{name: string, value: string},{name: string, value: string},{name: string, value: string},{name: string, value: string},null,null]}
@@ -42,8 +42,47 @@ const confirmUpdate = (newVersion) => {
                 value: false,
                 description: 'Cancel update',
             }
-        ]})
+        ]
+    })
         .then(answers => answers);
+};
+
+/**
+ * Check if Git is installed
+ * @returns {Promise<boolean>}
+ */
+const checkGitInstalled = async () => {
+    const spinner = ora('Checking if Git is installed...').start();
+    return new Promise((resolve) => {
+        exec('git --version', (error, stdout, stderr) => {
+            if (error) {
+                spinner.fail('Git is not installed or not found in PATH');
+                resolve(false);
+            } else {
+                spinner.succeed('Git is installed');
+                resolve(true);
+            }
+        });
+    });
+};
+
+/**
+ * Check if the user is logged into Git
+ * @returns {Promise<boolean>}
+ */
+const checkGitLogin = async () => {
+    const spinner = ora('Checking if the user is logged into Git...').start();
+    return new Promise((resolve) => {
+        exec('git config --get user.name', (error, stdout, stderr) => {
+            if (error || !stdout.trim()) {
+                spinner.fail('User is not logged into Git');
+                resolve(false);
+            } else {
+                spinner.succeed('User is logged into Git');
+                resolve(true);
+            }
+        });
+    });
 };
 
 /**
@@ -61,6 +100,7 @@ const AnalyzeFolder = async () => {
 
         try {
             const packageJson = require('./package.json');
+
             // Basic validation (optional)
             if (!packageJson.name || !packageJson.version) {
                 spinner.fail("package.json is not correct");
@@ -86,7 +126,7 @@ const AnalyzeFolder = async () => {
      */
     const checkGitHub = async () => {
         const gitSpinner = ora('Checking for Git repository...').start();
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             exec('git status', (error, stdout, stderr) => {
                 if (error) {
                     const errorMessage = error.toString();
@@ -105,16 +145,14 @@ const AnalyzeFolder = async () => {
     };
 
     /**
-     * Execute the two functions and returns the values
+     * Execute the functions and return the values
      */
     return new Promise(async (resolve, reject) => {
-        const isNodeProject = checkPackageJson();
-        try {
-            const isGitConfigured = await checkGitHub();
-            resolve({ isNodeProject, isGitConfigured });
-        } catch (error) {
-            reject(error); // Handle errors in checkGitHub
-        }
+        const isGitInstalled = await checkGitInstalled();
+        const isNodeProject = isGitInstalled ? checkPackageJson() : false;
+        const isGitConfigured = isGitInstalled && isNodeProject ? await checkGitHub() : false;
+        const isUserLoggedIn = isGitInstalled && isNodeProject ? await checkGitLogin() : false;
+        resolve({ isNodeProject, isGitConfigured, isUserLoggedIn });
     });
 };
 
@@ -123,15 +161,14 @@ const AnalyzeFolder = async () => {
  * @returns {Promise<void>}
  */
 const processInput = async () => {
-    //Analyze director
+    //Analyze directory
     AnalyzeFolder().then(async result => {
-        if(result.isNodeProject && result.isGitConfigured) {
+        if (result.isNodeProject && result.isGitConfigured && result.isUserLoggedIn) {
             // Prompt for release type
             const releaseType = await select({
                 message: 'What type of release is it?',
                 choices: releaseTypes,
             });
-
 
             const currentVersion = require('./package.json').version;
             const projectName = require('./package.json').name;
@@ -145,27 +182,31 @@ const processInput = async () => {
                     if (confirmed) {
                         // Update version in package.json
                         exec(`npm version ${newVersion}`, (err, stdout, stderr) => {
-                            console.log(err.message);
-                            
+                            if (err) {
+                                version.fail(`Error updating version: ${err.message}`);
+                                return;
+                            }
 
-                            console.log(`Version updated to: ${newVersion}`);
+                            version.succeed(`Version updated to: ${newVersion}`);
 
-                            const commit = ora("Commit").start();
+                            const commit = ora("Committing changes...").start();
 
                             // Git commit, push, and optional release creation (unchanged)
-                            exec(`git add . && git commit -m "Version: ${newVersion} - " && git push`, (err, stdout, stderr) => {
+                            exec(`git add . && git commit -m "Version: ${newVersion}" && git push`, (err, stdout, stderr) => {
                                 if (err) {
-                                    console.error(err);
+                                    commit.fail(`Error during commit: ${err.message}`);
                                     return;
                                 }
 
-                                commit.succeed("Committed")
+                                commit.succeed("Changes committed and pushed");
                             });
                         });
                     } else {
-                        console.log('Aggiornamento annullato.');
+                        console.log('Update cancelled.');
                     }
                 });
+        } else {
+            console.log('Project setup is not valid. Please check the error messages.');
         }
     })
 };
