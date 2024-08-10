@@ -1,6 +1,6 @@
 const { checkGitInstalled, checkGitLogin, checkGitHub, checkGitClean, commitChanges } = require('./utils/git');
 const { checkPackageJson } = require('./utils/project');
-const { confirmUpdate, getReleaseType } = require('./cli');
+const { confirmUpdate, getReleaseType, askForCommitMessage, confirmPush } = require('./cli');
 const semver = require('semver');
 const { exec } = require('child_process');
 const ora = require('ora');
@@ -31,43 +31,70 @@ const processInput = async () => {
             const releaseType = await getReleaseType();
             const currentVersion = require('./package.json').version;
 
-            console.log(`Current version: ${currentVersion}`);
-
             const newVersion = semver.inc(currentVersion, releaseType);
+
+            // Chiedi il messaggio di commit
+            const commitMessagePrefix = await askForCommitMessage();
+            const fullCommitMessage = `Version: ${newVersion} - ${commitMessagePrefix}`;
 
             const gitClean = await checkGitClean();
             if (!gitClean) {
                 await commitChanges();  // Commit preliminare delle modifiche
             }
 
+            // Fermiamo lo spinner prima di chiedere la conferma
             const versionSpinner = ora('Updating version...').start();
+            versionSpinner.stop();
 
-            confirmUpdate(newVersion)
-                .then(confirmed => {
-                    if (confirmed) {
-                        exec(`npm version ${newVersion}`, (err, stdout, stderr) => {
-                            if (err) {
-                                versionSpinner.fail(`Error updating version: ${err.message}`);
-                                return;
-                            }
+            const confirmed = await confirmUpdate(newVersion, currentVersion);
+            if (confirmed) {
+                versionSpinner.start();  // Riavviamo lo spinner
 
-                            versionSpinner.succeed(`Version updated to: ${newVersion}`);
+                exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
+                    if (err) {
+                        versionSpinner.fail(`Error updating version: ${err.message}`);
+                        return;
+                    }
 
-                            const commit = ora("Committing version changes...").start();
+                    versionSpinner.succeed(`Version updated to: ${newVersion}`);
+
+                    // Mostra le informazioni finali prima di chiedere la conferma
+                    console.log("\nSummary:");
+                    console.log(`- Current Version: ${currentVersion}`);
+                    console.log(`- New Version: ${newVersion}`);
+                    console.log(`- Commit Message: ${fullCommitMessage}\n`);
+
+                    const commitSpinner = ora("Committing version changes...").start();
+
+                    exec(`git add . && git commit -m "${fullCommitMessage}"`, async (err, stdout, stderr) => {
+                        if (err) {
+                            commitSpinner.fail(`Error during commit: ${err.message}`);
+                            return;
+                        }
+
+                        commitSpinner.succeed("Changes committed");
+
+                        // Conferma finale prima del push
+                        const pushConfirmed = await confirmPush();
+                        if (pushConfirmed) {
+                            const pushSpinner = ora("Pushing changes...").start();
 
                             exec(`git push`, (err, stdout, stderr) => {
                                 if (err) {
-                                    commit.fail(`Error during push: ${err.message}`);
+                                    pushSpinner.fail(`Error during push: ${err.message}`);
                                     return;
                                 }
 
-                                commit.succeed("Changes committed and pushed");
+                                pushSpinner.succeed("Changes pushed successfully");
                             });
-                        });
-                    } else {
-                        console.log('Update cancelled.');
-                    }
+                        } else {
+                            console.log('Push cancelled.');
+                        }
+                    });
                 });
+            } else {
+                console.log('Update cancelled.');
+            }
         } else {
             console.log('Project setup is not valid. Please check the error messages.');
         }
