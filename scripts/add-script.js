@@ -1,7 +1,8 @@
 const fs = require('fs');
 
 // Leggi il package.json del progetto parent
-let packageJson = require("../../../package.json");
+const packageJsonPath = "../../../package.json"
+let packageJson = require(packageJsonPath);
 
 // Aggiungi lo script per avviare il progetto
 packageJson.scripts = packageJson.scripts || {};
