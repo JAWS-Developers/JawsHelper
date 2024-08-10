@@ -48,50 +48,52 @@ const processInput = async () => {
 
             const confirmed = await confirmUpdate(newVersion, currentVersion);
             if (confirmed) {
-                versionSpinner.start();  // Riavviamo lo spinner
 
-                exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
-                    if (err) {
-                        versionSpinner.fail(`Error updating version: ${err.message}`);
-                        return;
-                    }
 
-                    versionSpinner.succeed(`Version updated to: ${newVersion}`);
+                // Mostra le informazioni finali prima di chiedere la conferma
+                console.log("\nSummary:");
+                console.log(`- Current Version: ${currentVersion}`);
+                console.log(`- New Version: ${newVersion}`);
+                console.log(`- Commit Message: ${fullCommitMessage}\n`);
 
-                    // Mostra le informazioni finali prima di chiedere la conferma
-                    console.log("\nSummary:");
-                    console.log(`- Current Version: ${currentVersion}`);
-                    console.log(`- New Version: ${newVersion}`);
-                    console.log(`- Commit Message: ${fullCommitMessage}\n`);
+                const pushConfirmed = await confirmPush();
+                if (pushConfirmed) {
 
-                    const commitSpinner = ora("Committing version changes...").start();
-
-                    exec(`git add . && git commit -m "${fullCommitMessage}"`, async (err, stdout, stderr) => {
+                    versionSpinner.start();  // Riavviamo lo spinner
+                    exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
                         if (err) {
-                            commitSpinner.fail(`Error during commit: ${err.message}`);
+                            versionSpinner.fail(`Error updating version: ${err.message}`);
                             return;
                         }
 
-                        commitSpinner.succeed("Changes committed");
+                        versionSpinner.succeed(`Version updated to: ${newVersion}`);
 
-                        // Conferma finale prima del push
-                        const pushConfirmed = await confirmPush();
-                        if (pushConfirmed) {
-                            const pushSpinner = ora("Pushing changes...").start();
 
-                            exec(`git push`, (err, stdout, stderr) => {
-                                if (err) {
-                                    pushSpinner.fail(`Error during push: ${err.message}`);
-                                    return;
-                                }
+                        const commitSpinner = ora("Committing version changes...").start();
 
-                                pushSpinner.succeed("Changes pushed successfully");
-                            });
-                        } else {
-                            console.log('Push cancelled.');
-                        }
+                        exec(`git add . && git commit -m "${fullCommitMessage}"`, async (err, stdout, stderr) => {
+                            if (err) {
+                                commitSpinner.fail(`Error during commit: ${err.message}`);
+                                return;
+                            }
+
+                            commitSpinner.succeed("Changes committed");
+                        });
+
+                        const pushSpinner = ora("Pushing changes...").start();
+
+                        exec(`git push`, (err, stdout, stderr) => {
+                            if (err) {
+                                pushSpinner.fail(`Error during push: ${err.message}`);
+                                return;
+                            }
+
+                            pushSpinner.succeed("Changes pushed successfully");
+                        });
                     });
-                });
+                } else {
+                    console.log('Push cancelled.');
+                }
             } else {
                 console.log('Update cancelled.');
             }
