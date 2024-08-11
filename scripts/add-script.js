@@ -1,3 +1,5 @@
+console.log("Esecuzione dello script postinstall...");
+
 const fs = require('fs');
 
 // Leggi il package.json del progetto parent
