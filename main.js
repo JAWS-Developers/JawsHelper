@@ -4,18 +4,7 @@ const { confirmUpdate, getReleaseType, askForCommitMessage, confirmPush } = requ
 const semver = require('semver');
 const { exec } = require('child_process');
 const ora = require('ora');
-
-const execPromise = (command) => {
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(stdout);
-            }
-        });
-    });
-};
+const process = require('node:process')
 
 const AnalyzeFolder = async () => {
     const isGitInstalled = await checkGitInstalled();
@@ -29,7 +18,7 @@ const processInput = async () => {
     AnalyzeFolder().then(async result => {
         if (result.isNodeProject && result.isGitConfigured && result.isUserLoggedIn) {
             const releaseType = await getReleaseType();
-            const currentVersion = require('./package.json').version;
+            const currentVersion = require('../../package.json').version;
 
             const newVersion = semver.inc(currentVersion, releaseType);
 

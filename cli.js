@@ -4,9 +4,6 @@ const releaseTypes = [
     { name: 'Major', value: 'major' },
     { name: 'Minor', value: 'minor' },
     { name: 'Patch', value: 'patch' },
-    { name: 'Premajor', value: 'premajor' },
-    { name: 'Preminor', value: 'preminor' },
-    { name: 'Prepatch', value: 'prepatch' },
     { name: 'Prerelease', value: 'prerelease' },
 ];
 

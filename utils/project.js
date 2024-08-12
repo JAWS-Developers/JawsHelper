@@ -8,7 +8,7 @@ const checkPackageJson = () => {
     const spinner = ora('Checking for package.json...').start();
 
     try {
-        const packageJson = require('../package.json');
+        const packageJson = require('../../../package.json');
 
         // Basic validation (optional)
         if (!packageJson.name || !packageJson.version) {
