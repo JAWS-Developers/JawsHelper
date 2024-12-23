@@ -8,7 +8,7 @@ import { log } from "console";
 export class FirstActions {
     private static actions: FirstActionType[] = [
         {
-            label: "Create new release 🚀",
+            label: chalk.greenBright("Create new release 🚀"),
             action: createNewRelease
         },
     ];
@@ -30,8 +30,10 @@ export class FirstActions {
                 choices: FirstActions.getLabels(),
             },
         ]).then(data => {
-            FirstActions.getActions().filter(action => action.label === data.action)[0].action()
-        })
+            const selectedAction = FirstActions.getActions().filter(action => action.label === data.action)[0];
+            log(chalk.magentaBright(`You selected: ${selectedAction.label}`));
+            selectedAction.action();
+        });
     }
 }
 
@@ -42,8 +44,12 @@ export class ReleaseManager {
             {
                 type: 'list',
                 name: 'releaseType',
-                message: 'What type of release is it?',
-                choices: ['major', 'minor', 'patch'],
+                message: chalk.yellowBright('What type of release is it? 🛠️'),
+                choices: [
+                    { name: chalk.greenBright('major 🚀'), value: "major" },
+                    { name: chalk.blueBright('minor 🟦'), value: "major" },
+                    { name: chalk.gray('patch 🛠️'), value: "major" }
+                ],
             },
         ]);
     }
@@ -53,27 +59,27 @@ export class ReleaseManager {
             {
                 type: "input",
                 name: "jira",
-                message: "Insert all solve jira tasks"
+                message: chalk.blueBright("Insert all solved Jira tasks 📝:")
             }
         ]);
     }
 
-    static async confirmUpdate(newVersion: string, currentVersion: string) {        
+    static async confirmUpdate(newVersion: string, currentVersion: string) {
         return await inquirer.prompt([
             {
                 type: "confirm",
                 name: "confirm",
-                message: `Update the version to : ${newVersion} (Current version: ${currentVersion})?`,
+                message: chalk.magentaBright(`Update the version to: ${chalk.cyanBright(newVersion)} (Current version: ${chalk.cyanBright(currentVersion)})?`)
             }
         ])
     }
 
-    static async confirmPush() {        
+    static async confirmPush() {
         return await inquirer.prompt([
             {
                 type: "confirm",
                 name: "confirm",
-                message: `The project will be pushed to github. Confirm?`,
+                message: chalk.yellowBright(`The project will be pushed to GitHub. Confirm? 🤖`)
             }
         ])
     }
@@ -83,7 +89,7 @@ export class ReleaseManager {
             {
                 type: "input",
                 name: "commitMessage",
-                message: "Insert commit message"
+                message: chalk.greenBright("Insert commit message 📝:")
             }
         ]);
     }

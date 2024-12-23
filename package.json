@@ -1,6 +1,6 @@
 {
   "name": "jaws-helper",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "main": "dist/cli.js",
   "bin": {
     "jaws-helper": "dist/entry.js"
