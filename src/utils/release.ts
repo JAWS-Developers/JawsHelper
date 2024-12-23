@@ -31,6 +31,16 @@ export const createNewRelease = async (): Promise<void> => {
                 return;
             }
 
+            const versionSpinner = ora('Updating version...').start();
+
+            exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
+                if (err) {
+                    versionSpinner.fail(`Error updating version: ${err.message}`);
+                    return;
+                }
+
+                versionSpinner.succeed(`Version updated to: ${newVersion}`);
+            })
 
             // Esegui il push
             const pushSpinner = ora('Pushing changes to GitHub...').start();

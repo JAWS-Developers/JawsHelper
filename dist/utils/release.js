@@ -15,7 +15,7 @@ const createNewRelease = async () => {
     const jiraTasks = (await inquirer_1.ReleaseManager.getJiraTasks()).jira;
     const newVersion = semver_1.default.inc(currentVersion, releaseType);
     const commitMessagePrefix = (await inquirer_1.ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `${jiraTasks == "" ? "no tasks" : jiraTasks}  | ${newVersion} - ${commitMessagePrefix}`;
+    const fullCommitMessage = `${jiraTasks == "" ? "no tasks" : jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
     console.log("\nSummary:");
     console.log(`- Current Version: ${currentVersion}`);
     console.log(`- New Version: ${newVersion}`);
@@ -29,6 +29,14 @@ const createNewRelease = async () => {
             if (err) {
                 return;
             }
+            const versionSpinner = (0, ora_1.default)('Updating version...').start();
+            (0, child_process_1.exec)(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
+                if (err) {
+                    versionSpinner.fail(`Error updating version: ${err.message}`);
+                    return;
+                }
+                versionSpinner.succeed(`Version updated to: ${newVersion}`);
+            });
             // Esegui il push
             const pushSpinner = (0, ora_1.default)('Pushing changes to GitHub...').start();
             (0, child_process_1.exec)('git push', (err, stdout, stderr) => {
