@@ -36,15 +36,15 @@ const createNewRelease = async () => {
                     return;
                 }
                 versionSpinner.succeed(`Version updated to: ${newVersion}`);
-            });
-            // Esegui il push
-            const pushSpinner = (0, ora_1.default)('Pushing changes to GitHub...').start();
-            (0, child_process_1.exec)('git push', (err, stdout, stderr) => {
-                if (err) {
-                    pushSpinner.fail(`Error during push: ${err.message}`);
-                    return;
-                }
-                pushSpinner.succeed('Changes pushed successfully');
+                // Esegui il push
+                const pushSpinner = (0, ora_1.default)('Pushing changes to GitHub...').start();
+                (0, child_process_1.exec)('git push', (err, stdout, stderr) => {
+                    if (err) {
+                        pushSpinner.fail(`Error during push: ${err.message}`);
+                        return;
+                    }
+                    pushSpinner.succeed('Changes pushed successfully');
+                });
             });
         });
     });

@@ -12,7 +12,7 @@ export const createNewRelease = async (): Promise<void> => {
     const newVersion = semver.inc(currentVersion, releaseType) as string;
 
     const commitMessagePrefix = (await ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `${jiraTasks == "" ?  "no tasks" : jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
+    const fullCommitMessage = `${jiraTasks == "" ? "no tasks" : jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
 
     console.log("\nSummary:");
     console.log(`- Current Version: ${currentVersion}`);
@@ -40,18 +40,18 @@ export const createNewRelease = async (): Promise<void> => {
                 }
 
                 versionSpinner.succeed(`Version updated to: ${newVersion}`);
+
+                // Esegui il push
+                const pushSpinner = ora('Pushing changes to GitHub...').start();
+                exec('git push', (err, stdout, stderr) => {
+                    if (err) {
+                        pushSpinner.fail(`Error during push: ${err.message}`);
+                        return;
+                    }
+
+                    pushSpinner.succeed('Changes pushed successfully');
+                });
             })
-
-            // Esegui il push
-            const pushSpinner = ora('Pushing changes to GitHub...').start();
-            exec('git push', (err, stdout, stderr) => {
-                if (err) {
-                    pushSpinner.fail(`Error during push: ${err.message}`);
-                    return;
-                }
-
-                pushSpinner.succeed('Changes pushed successfully');
-            });
         });
     })
 
