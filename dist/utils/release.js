@@ -15,7 +15,7 @@ const createNewRelease = async () => {
     const jiraTasks = (await inquirer_1.ReleaseManager.getJiraTasks()).jira;
     const newVersion = semver_1.default.inc(currentVersion, releaseType);
     const commitMessagePrefix = (await inquirer_1.ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `${jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
+    const fullCommitMessage = `${jiraTasks == "" ? "no tasks" : jiraTasks}  | ${newVersion} - ${commitMessagePrefix}`;
     console.log("\nSummary:");
     console.log(`- Current Version: ${currentVersion}`);
     console.log(`- New Version: ${newVersion}`);
