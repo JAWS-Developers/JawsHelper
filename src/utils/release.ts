@@ -1,40 +1,27 @@
-import inquirer from 'inquirer';
 import semver from 'semver';
 import ora from 'ora';
 import { exec } from 'child_process';
 import { ReleaseManager } from '../inquirer';
 
 
-// Funzione per ottenere il tipo di release
-const getReleaseType = async (): Promise<'major' | 'minor' | 'patch'> => {
-    const { releaseType } = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'releaseType',
-            message: 'What type of release is it?',
-            choices: ['major', 'minor', 'patch'],
-        },
-    ]);
-    return releaseType;
-};
-
 // Funzione principale che gestisce la release
 export const createNewRelease = async (): Promise<void> => {
     const currentVersion = require(process.env.NODE_ENV == "development" ? '../../package.json' : '../../../../package.json').version;
     const releaseType = (await ReleaseManager.askReleaseType()).releaseType;
+    const jiraTasks = (await ReleaseManager.getJiraTasks()).jira;
     const newVersion = semver.inc(currentVersion, releaseType) as string;
 
     const commitMessagePrefix = (await ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `Version: ${newVersion} - ${commitMessagePrefix}`;
+    const fullCommitMessage = `${jiraTasks ?? "no tasks"}  | ${newVersion} - ${commitMessagePrefix}`;
+
+    console.log("\nSummary:");
+    console.log(`- Current Version: ${currentVersion}`);
+    console.log(`- New Version: ${newVersion}`);
+    console.log(`- Commit Message: ${fullCommitMessage}\n`);
 
     ReleaseManager.confirmUpdate(newVersion, currentVersion).then(data => {
         if (!data.confirm)
             return;
-
-        console.log("\nSummary:");
-        console.log(`- Current Version: ${currentVersion}`);
-        console.log(`- New Version: ${newVersion}`);
-        console.log(`- Commit Message: ${fullCommitMessage}\n`);
 
 
         // Esegui il commit

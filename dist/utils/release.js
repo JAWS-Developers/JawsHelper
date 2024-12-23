@@ -4,37 +4,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createNewRelease = void 0;
-const inquirer_1 = __importDefault(require("inquirer"));
 const semver_1 = __importDefault(require("semver"));
 const ora_1 = __importDefault(require("ora"));
 const child_process_1 = require("child_process");
-const inquirer_2 = require("../inquirer");
-// Funzione per ottenere il tipo di release
-const getReleaseType = async () => {
-    const { releaseType } = await inquirer_1.default.prompt([
-        {
-            type: 'list',
-            name: 'releaseType',
-            message: 'What type of release is it?',
-            choices: ['major', 'minor', 'patch'],
-        },
-    ]);
-    return releaseType;
-};
+const inquirer_1 = require("../inquirer");
 // Funzione principale che gestisce la release
 const createNewRelease = async () => {
     const currentVersion = require(process.env.NODE_ENV == "development" ? '../../package.json' : '../../../../package.json').version;
-    const releaseType = (await inquirer_2.ReleaseManager.askReleaseType()).releaseType;
+    const releaseType = (await inquirer_1.ReleaseManager.askReleaseType()).releaseType;
+    const jiraTasks = (await inquirer_1.ReleaseManager.getJiraTasks()).jira;
     const newVersion = semver_1.default.inc(currentVersion, releaseType);
-    const commitMessagePrefix = (await inquirer_2.ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `Version: ${newVersion} - ${commitMessagePrefix}`;
-    inquirer_2.ReleaseManager.confirmUpdate(newVersion, currentVersion).then(data => {
+    const commitMessagePrefix = (await inquirer_1.ReleaseManager.askCommitMessage()).commitMessage;
+    const fullCommitMessage = `${jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
+    console.log("\nSummary:");
+    console.log(`- Current Version: ${currentVersion}`);
+    console.log(`- New Version: ${newVersion}`);
+    console.log(`- Commit Message: ${fullCommitMessage}\n`);
+    inquirer_1.ReleaseManager.confirmUpdate(newVersion, currentVersion).then(data => {
         if (!data.confirm)
             return;
-        console.log("\nSummary:");
-        console.log(`- Current Version: ${currentVersion}`);
-        console.log(`- New Version: ${newVersion}`);
-        console.log(`- Commit Message: ${fullCommitMessage}\n`);
         // Esegui il commit
         const commitMessage = `Release version ${newVersion}`;
         (0, child_process_1.exec)(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {

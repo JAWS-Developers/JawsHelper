@@ -48,6 +48,16 @@ export class ReleaseManager {
         ]);
     }
 
+    static async getJiraTasks() {
+        return inquirer.prompt([
+            {
+                type: "input",
+                name: "jira",
+                message: "Insert all solve jira tasks"
+            }
+        ]);
+    }
+
     static async confirmUpdate(newVersion: string, currentVersion: string) {        
         return await inquirer.prompt([
             {
@@ -69,7 +79,7 @@ export class ReleaseManager {
     }
 
     static async askCommitMessage() {
-        return inquirer.prompt([
+        return await inquirer.prompt([
             {
                 type: "input",
                 name: "commitMessage",
