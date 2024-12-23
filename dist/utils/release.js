@@ -31,8 +31,7 @@ const createNewRelease = async () => {
             }
             versionSpinner.succeed(`Version updated to: ${newVersion}`);
             // Esegui il commit
-            const commitMessage = `Release version ${newVersion}`;
-            (0, child_process_1.exec)(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+            (0, child_process_1.exec)(`git add . && git commit -m "${fullCommitMessage}"`, (err, stdout, stderr) => {
                 if (err) {
                     return;
                 }

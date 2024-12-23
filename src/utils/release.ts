@@ -33,8 +33,7 @@ export const createNewRelease = async (): Promise<void> => {
 
             versionSpinner.succeed(`Version updated to: ${newVersion}`);
             // Esegui il commit
-            const commitMessage = `Release version ${newVersion}`;
-            exec(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+            exec(`git add . && git commit -m "${fullCommitMessage}"`, (err, stdout, stderr) => {
                 if (err) {
                     return;
                 }
