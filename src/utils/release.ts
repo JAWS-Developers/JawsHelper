@@ -23,23 +23,21 @@ export const createNewRelease = async (): Promise<void> => {
         if (!data.confirm)
             return;
 
+        const versionSpinner = ora('Updating version...').start();
 
-        // Esegui il commit
-        const commitMessage = `Release version ${newVersion}`;
-        exec(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+        exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
             if (err) {
+                versionSpinner.fail(`Error updating version: ${err.message}`);
                 return;
             }
 
-            const versionSpinner = ora('Updating version...').start();
-
-            exec(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
+            versionSpinner.succeed(`Version updated to: ${newVersion}`);
+            // Esegui il commit
+            const commitMessage = `Release version ${newVersion}`;
+            exec(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
                 if (err) {
-                    versionSpinner.fail(`Error updating version: ${err.message}`);
                     return;
                 }
-
-                versionSpinner.succeed(`Version updated to: ${newVersion}`);
 
                 // Esegui il push
                 const pushSpinner = ora('Pushing changes to GitHub...').start();
@@ -51,8 +49,8 @@ export const createNewRelease = async (): Promise<void> => {
 
                     pushSpinner.succeed('Changes pushed successfully');
                 });
-            })
-        });
+            });
+        })
     })
 
 };

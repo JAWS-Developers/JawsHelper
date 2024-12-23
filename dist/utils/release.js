@@ -23,19 +23,19 @@ const createNewRelease = async () => {
     inquirer_1.ReleaseManager.confirmUpdate(newVersion, currentVersion).then(data => {
         if (!data.confirm)
             return;
-        // Esegui il commit
-        const commitMessage = `Release version ${newVersion}`;
-        (0, child_process_1.exec)(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+        const versionSpinner = (0, ora_1.default)('Updating version...').start();
+        (0, child_process_1.exec)(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
             if (err) {
+                versionSpinner.fail(`Error updating version: ${err.message}`);
                 return;
             }
-            const versionSpinner = (0, ora_1.default)('Updating version...').start();
-            (0, child_process_1.exec)(`npm version ${newVersion} --no-git-tag-version`, (err, stdout, stderr) => {
+            versionSpinner.succeed(`Version updated to: ${newVersion}`);
+            // Esegui il commit
+            const commitMessage = `Release version ${newVersion}`;
+            (0, child_process_1.exec)(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
                 if (err) {
-                    versionSpinner.fail(`Error updating version: ${err.message}`);
                     return;
                 }
-                versionSpinner.succeed(`Version updated to: ${newVersion}`);
                 // Esegui il push
                 const pushSpinner = (0, ora_1.default)('Pushing changes to GitHub...').start();
                 (0, child_process_1.exec)('git push', (err, stdout, stderr) => {
