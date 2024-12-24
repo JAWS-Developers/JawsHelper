@@ -51,8 +51,8 @@ class ReleaseManager {
                 message: chalk_1.default.yellowBright('What type of release is it? 🛠️'),
                 choices: [
                     { name: chalk_1.default.greenBright('major 🚀'), value: "major" },
-                    { name: chalk_1.default.blueBright('minor 🟦'), value: "major" },
-                    { name: chalk_1.default.gray('patch 🛠️'), value: "major" }
+                    { name: chalk_1.default.blueBright('minor 🟦'), value: "minor" },
+                    { name: chalk_1.default.gray('patch 🛠️'), value: "patch" }
                 ],
             },
         ]);

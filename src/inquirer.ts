@@ -52,8 +52,8 @@ export class ReleaseManager {
                 message: chalk.yellowBright('What type of release is it? 🛠️'),
                 choices: [
                     { name: chalk.greenBright('major 🚀'), value: "major" },
-                    { name: chalk.blueBright('minor 🟦'), value: "major" },
-                    { name: chalk.gray('patch 🛠️'), value: "major" }
+                    { name: chalk.blueBright('minor 🟦'), value: "minor" },
+                    { name: chalk.gray('patch 🛠️'), value: "patch" }
                 ],
             },
         ]);
