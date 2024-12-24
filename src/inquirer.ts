@@ -3,6 +3,7 @@ import { FirstActionType } from "./inquirerType";
 import inquirer from "inquirer";
 import chalk from "chalk";
 import { log } from "console";
+import { writeCopy } from "./utils/copyright";
 
 
 export class FirstActions {
@@ -10,6 +11,10 @@ export class FirstActions {
         {
             label: chalk.greenBright("Create new release 🚀"),
             action: createNewRelease
+        },
+        {
+            label: chalk.greenBright("Write copyright ©️"),
+            action: writeCopy
         },
     ];
 

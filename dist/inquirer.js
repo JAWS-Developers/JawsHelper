@@ -8,6 +8,7 @@ const release_1 = require("./utils/release");
 const inquirer_1 = __importDefault(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const console_1 = require("console");
+const copyright_1 = require("./utils/copyright");
 class FirstActions {
     static getLabels() {
         return this.actions.map(item => item.label);
@@ -35,6 +36,10 @@ FirstActions.actions = [
     {
         label: chalk_1.default.greenBright("Create new release 🚀"),
         action: release_1.createNewRelease
+    },
+    {
+        label: chalk_1.default.greenBright("Write copyright ©️"),
+        action: copyright_1.writeCopy
     },
 ];
 class ReleaseManager {
