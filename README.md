@@ -1,4 +1,4 @@
-# 🛠️ JAWS Helpers
+# 🛠️ JAWS Helper
 
 Uno strumento utile per semplificare lo sviluppo di progetti con JAWS Developers! Questo pacchetto offre diverse utility che puoi usare per migliorare la gestione delle tue applicazioni.
 
