@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import inquirer from "inquirer";
 import { FirstActions } from "./inquirer";
 import { AnalyzeFolder } from "./utils/project";
 
