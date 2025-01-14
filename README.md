@@ -7,4 +7,4 @@ Uno strumento utile per semplificare lo sviluppo di progetti con JAWS Developers
 Per installare **JAWS Helpers** come dipendenza di sviluppo nel tuo progetto, esegui il seguente comando:
 
 ```bash
-npm install --save-dev jaws-helpers
+npm install --save-dev jaws-helper
