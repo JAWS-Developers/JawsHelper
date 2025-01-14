@@ -14,7 +14,7 @@ const ora = require('ora');
 const checkPackageJson = () => {
     const spinner = ora(chalk_1.default.yellow('Checking for package.json...')).start();
     try {
-        const packageJson = require(process.env.NODE_ENV == "development" ? '../../package.json' : '../../../../package.json');
+        const packageJson = require(process.env.NODE_ENV == "development" ? '../../package.json' : './package.json');
         // Basic validation (optional)
         if (!packageJson.name || !packageJson.version) {
             spinner.fail("package.json is not correct");

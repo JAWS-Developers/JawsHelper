@@ -8,3 +8,9 @@ Per installare **JAWS Helpers** come dipendenza di sviluppo nel tuo progetto, es
 
 ```bash
 npm install --save-dev jaws-helper
+```
+
+execute:
+```bash
+jaws-helper
+```
