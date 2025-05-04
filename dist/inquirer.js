@@ -23,7 +23,7 @@ class FirstActions {
                 name: 'action',
                 message: chalk_1.default.cyanBright("What do you want to do❓ 🤔"),
                 choices: FirstActions.getLabels(),
-            },
+            }
         ]).then(data => {
             const selectedAction = FirstActions.getActions().filter(action => action.label === data.action)[0];
             (0, console_1.log)(chalk_1.default.magentaBright(`You selected: ${selectedAction.label}`));
@@ -40,6 +40,10 @@ FirstActions.actions = [
     {
         label: chalk_1.default.greenBright("Write copyright ©️"),
         action: copyright_1.writeCopy
+    },
+    {
+        label: chalk_1.default.greenBright("Exit 👋"),
+        action: () => process.exit(0)
     },
 ];
 class ReleaseManager {

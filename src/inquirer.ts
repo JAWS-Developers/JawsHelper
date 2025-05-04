@@ -16,6 +16,10 @@ export class FirstActions {
             label: chalk.greenBright("Write copyright ©️"),
             action: writeCopy
         },
+        {
+            label: chalk.greenBright("Exit 👋"),
+            action: () => process.exit(0)
+        },
     ];
 
     static getLabels() {
@@ -33,12 +37,13 @@ export class FirstActions {
                 name: 'action',
                 message: chalk.cyanBright("What do you want to do❓ 🤔"),
                 choices: FirstActions.getLabels(),
-            },
+            }
         ]).then(data => {
             const selectedAction = FirstActions.getActions().filter(action => action.label === data.action)[0];
             log(chalk.magentaBright(`You selected: ${selectedAction.label}`));
             selectedAction.action();
         });
+
     }
 }
 

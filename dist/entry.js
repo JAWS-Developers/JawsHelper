@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = require("./inquirer");
 const project_1 = require("./utils/project");
+const helper_1 = require("./utils/helper");
 // Fancy ASCII Art Title
 const title = `
        ██╗  █████╗ ██╗    ██╗███████╗
@@ -23,6 +24,14 @@ console.log(chalk_1.default.greenBright("🌊 Welcome to ") +
     chalk_1.default.greenBright("! 🚀"));
 console.log(chalk_1.default.yellow("Preparing your environment...") +
     chalk_1.default.yellow.bold(" Please wait."));
+process.on('uncaughtException', (error) => {
+    if (error instanceof Error && error.name === 'ExitPromptError') {
+        (0, helper_1.cancelByUser)();
+    }
+    else {
+        throw error;
+    }
+});
 (0, project_1.AnalyzeFolder)().then(({ isGitConfigured, isNodeProject, isUserLoggedIn }) => {
     if (!isGitConfigured || !isNodeProject || !isUserLoggedIn)
         return;

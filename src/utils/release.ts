@@ -12,7 +12,7 @@ export const createNewRelease = async (): Promise<void> => {
     const newVersion = semver.inc(currentVersion, releaseType) as string;
 
     const commitMessagePrefix = (await ReleaseManager.askCommitMessage()).commitMessage;
-    const fullCommitMessage = `${jiraTasks == "" ? "no tasks" : jiraTasks} | ${newVersion} - ${commitMessagePrefix}`;
+    const fullCommitMessage = `${jiraTasks == "" ? "" : jiraTasks + " | "}${newVersion} - ${commitMessagePrefix}`;
 
     console.log("\nSummary:");
     console.log(`- Current Version: ${currentVersion}`);
