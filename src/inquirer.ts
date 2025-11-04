@@ -4,6 +4,7 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import { log } from "console";
 import { writeCopy } from "./utils/copyright";
+import { verifyNodeModules } from "./utils/node_modules";
 
 
 export class FirstActions {
@@ -15,6 +16,10 @@ export class FirstActions {
         {
             label: chalk.greenBright("Write copyright ©️"),
             action: writeCopy
+        },
+        {
+            label: chalk.greenBright("Verify node_modules📝"),
+            action: verifyNodeModules
         },
         {
             label: chalk.greenBright("Exit 👋"),
@@ -100,6 +105,18 @@ export class ReleaseManager {
                 type: "input",
                 name: "commitMessage",
                 message: chalk.greenBright("Insert commit message 📝:")
+            }
+        ]);
+    }
+}
+
+export class NodeModules {
+    static async confirmDelete() {
+        return await inquirer.prompt([
+            {
+                type: "confirm",
+                name: "confirm",
+                message: chalk.magentaBright(`Are you sure you want to delete the node_modules folder? This action cannot be undone.`)
             }
         ]);
     }

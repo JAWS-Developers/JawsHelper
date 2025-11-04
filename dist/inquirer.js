@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReleaseManager = exports.FirstActions = void 0;
+exports.NodeModules = exports.ReleaseManager = exports.FirstActions = void 0;
 const release_1 = require("./utils/release");
 const inquirer_1 = __importDefault(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const console_1 = require("console");
 const copyright_1 = require("./utils/copyright");
+const node_modules_1 = require("./utils/node_modules");
 class FirstActions {
     static getLabels() {
         return this.actions.map(item => item.label);
@@ -40,6 +41,10 @@ FirstActions.actions = [
     {
         label: chalk_1.default.greenBright("Write copyright ©️"),
         action: copyright_1.writeCopy
+    },
+    {
+        label: chalk_1.default.greenBright("Verify node_modules📝"),
+        action: node_modules_1.verifyNodeModules
     },
     {
         label: chalk_1.default.greenBright("Exit 👋"),
@@ -99,3 +104,15 @@ class ReleaseManager {
     }
 }
 exports.ReleaseManager = ReleaseManager;
+class NodeModules {
+    static async confirmDelete() {
+        return await inquirer_1.default.prompt([
+            {
+                type: "confirm",
+                name: "confirm",
+                message: chalk_1.default.magentaBright(`Are you sure you want to delete the node_modules folder? This action cannot be undone.`)
+            }
+        ]);
+    }
+}
+exports.NodeModules = NodeModules;

@@ -23,8 +23,8 @@ The Software is provided "as is," without any warranties of any kind, either exp
 
 ## Governing Law
 
-This license is governed by the laws of Switzerland, and any disputes arising from the use of the Software will be resolved exclusively in the competent courts of [your city or region].
+This license is governed by the laws of Switzerland, and any disputes arising from the use of the Software will be resolved exclusively in the competent courts of Giubiasco.
 
 ## Contact
 
-For obtaining a commercial license, information regarding the contract, or any other inquiries, please contact JAWS Developers at [your-email] or visit our website at [your-website].
+For obtaining a commercial license, information regarding the contract, or any other inquiries, please contact JAWS Developers at info@jawsdevelopers.ch or visit our website at jawsdevelopers.ch.
