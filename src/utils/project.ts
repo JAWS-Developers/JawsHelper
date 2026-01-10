@@ -32,7 +32,7 @@ const checkPackageJson = () => {
     }
 };
 
-export const AnalyzeFolder = async () => {
+export const AnalyzeFolder = async (): Promise<{ isNodeProject: boolean; isGitConfigured: boolean; isUserLoggedIn: boolean }> => {
     const isGitInstalled = await checkGitInstalled();
     const isNodeProject = isGitInstalled ? checkPackageJson() : false;
     const isGitConfigured = isGitInstalled && isNodeProject ? await checkGitHub() : false;

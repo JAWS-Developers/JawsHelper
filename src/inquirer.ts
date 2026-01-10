@@ -12,44 +12,51 @@ export class FirstActions {
     private static actions: FirstActionType[] = [
         {
             label: chalk.greenBright("Git clone 📦"),
-            action: gitCloneFlow
+            action: gitCloneFlow,
+            requiresFullSetup: false
         },
         {
             label: chalk.greenBright("Create new release 🚀"),
-            action: createNewRelease
+            action: createNewRelease,
+            requiresFullSetup: true
         },
         {
             label: chalk.greenBright("Write copyright ©️"),
-            action: writeCopy
+            action: writeCopy,
+            requiresFullSetup: true
         },
         {
             label: chalk.greenBright("Verify node_modules📝"),
-            action: verifyNodeModules
+            action: verifyNodeModules,
+            requiresFullSetup: true
         },
         {
             label: chalk.greenBright("Exit 👋"),
-            action: () => process.exit(0)
+            action: () => process.exit(0),
+            requiresFullSetup: false
         },
     ];
 
-    static getLabels() {
-        return this.actions.map(item => item.label);
+    static getLabels(isFullyConfigured: boolean = true) {
+        return this.actions
+            .filter(action => !action.requiresFullSetup || isFullyConfigured)
+            .map(item => item.label);
     }
 
-    static getActions() {
-        return this.actions;
+    static getActions(isFullyConfigured: boolean = true) {
+        return this.actions.filter(action => !action.requiresFullSetup || isFullyConfigured);
     }
 
-    static printInquirer() {
+    static printInquirer(isFullyConfigured: boolean = true) {
         inquirer.prompt([
             {
                 type: 'list',
                 name: 'action',
                 message: chalk.cyanBright("What do you want to do❓ 🤔"),
-                choices: FirstActions.getLabels(),
+                choices: FirstActions.getLabels(isFullyConfigured),
             }
         ]).then(data => {
-            const selectedAction = FirstActions.getActions().filter(action => action.label === data.action)[0];
+            const selectedAction = FirstActions.getActions(isFullyConfigured).filter(action => action.label === data.action)[0];
             log(chalk.magentaBright(`You selected: ${selectedAction.label}`));
             selectedAction.action();
         });

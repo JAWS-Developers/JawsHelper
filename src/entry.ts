@@ -37,12 +37,15 @@ process.on('uncaughtException', (error) => {
 });
 
 AnalyzeFolder().then(({ isGitConfigured, isNodeProject, isUserLoggedIn }) => {
-  if (!isGitConfigured || !isNodeProject || !isUserLoggedIn)
-    return;
+  const isFullyConfigured: boolean = isGitConfigured && isNodeProject && isUserLoggedIn;
+  
+  if (isFullyConfigured) {
+    console.log(chalk.cyanBright("All systems operational! ✅"));
+  } else {
+    console.log(chalk.yellowBright("⚠️  Limited features available (Git clone only)"));
+  }
 
-  console.log(chalk.cyanBright("All systems operational! ✅"));
-
-  FirstActions.printInquirer();
+  FirstActions.printInquirer(isFullyConfigured);
 })
 
 
