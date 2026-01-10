@@ -20,17 +20,26 @@ jaws-helper
 ## ✨ Funzionalità
 
 ### 🔐 Git Clone
-Clona repository GitHub (pubblici e privati) con autenticazione:
+Clona repository GitHub (pubblici e privati) con due modalità:
+
+**Modalità 1: Clone diretto (senza autenticazione)**
+- Inserisci l'URL del repository (HTTPS o SSH)
+- Perfetto per repository pubblici
+- Non richiede token GitHub
+
+**Modalità 2: Sfoglia repository (con autenticazione)**
 - Autenticazione con GitHub Personal Access Token
 - Visualizza tutti i repository dell'utente e delle organizzazioni
+- Supporta repository privati
 - Supporta sia clonazione HTTPS che SSH
 - Selezione interattiva dei repository
 
-**Primo utilizzo:**
+**Primo utilizzo (solo per Modalità 2):**
 1. Seleziona "Git clone" dal menu principale
-2. Inserisci il tuo GitHub Personal Access Token (crealo su https://github.com/settings/tokens)
-3. Scopes richiesti: `repo`, `read:org`
-4. Il token verrà salvato in modo sicuro in `~/.jaws-helper/github-token`
+2. Scegli "Browse my repositories"
+3. Inserisci il tuo GitHub Personal Access Token (crealo su https://github.com/settings/tokens)
+4. Scopes richiesti: `repo`, `read:org`
+5. Il token verrà salvato in modo sicuro in `~/.jaws-helper/github-token`
 
 ### 🚀 Create new release
 Crea una nuova release del progetto con gestione automatica della versione.

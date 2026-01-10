@@ -77,11 +77,103 @@ const cloneRepository = async (repo, method, destination) => {
     }
 };
 /**
+ * Clone from URL without authentication
+ * @param {string} url
+ * @param {string} destination
+ * @returns {Promise<boolean>}
+ */
+const cloneFromUrl = async (url, destination) => {
+    const spinner = (0, ora_1.default)(chalk_1.default.yellow(`Cloning repository...`)).start();
+    try {
+        await execPromise(`git clone ${url} ${destination}`);
+        spinner.succeed(chalk_1.default.green(`Successfully cloned repository to ${destination}`));
+        return true;
+    }
+    catch (error) {
+        spinner.fail(chalk_1.default.red(`Failed to clone repository`));
+        console.error(chalk_1.default.red(error.message));
+        return false;
+    }
+};
+/**
+ * Handle manual URL clone flow
+ */
+const manualCloneFlow = async () => {
+    const { repoUrl } = await inquirer_1.default.prompt([
+        {
+            type: 'input',
+            name: 'repoUrl',
+            message: chalk_1.default.greenBright('Enter repository URL (HTTPS or SSH):'),
+            validate: (input) => {
+                if (!input || input.trim().length === 0) {
+                    return 'URL cannot be empty';
+                }
+                // Basic validation for git URLs
+                if (!input.includes('github.com') && !input.includes('git@')) {
+                    return 'Please enter a valid Git URL';
+                }
+                return true;
+            }
+        }
+    ]);
+    // Extract repo name from URL for default destination
+    const urlParts = repoUrl.trim().split('/');
+    const repoNameWithGit = urlParts[urlParts.length - 1];
+    const repoName = repoNameWithGit.replace('.git', '');
+    const { destination } = await inquirer_1.default.prompt([
+        {
+            type: 'input',
+            name: 'destination',
+            message: chalk_1.default.greenBright('Enter destination directory (or press Enter for current directory):'),
+            default: `./${repoName}`
+        }
+    ]);
+    const { confirm } = await inquirer_1.default.prompt([
+        {
+            type: 'confirm',
+            name: 'confirm',
+            message: chalk_1.default.yellowBright(`Clone repository to ${chalk_1.default.cyan(destination)}?`),
+            default: true
+        }
+    ]);
+    if (!confirm) {
+        console.log(chalk_1.default.yellow('Clone cancelled.'));
+        inquirer_2.FirstActions.printInquirer();
+        return;
+    }
+    const success = await cloneFromUrl(repoUrl.trim(), destination);
+    if (success) {
+        console.log(chalk_1.default.green.bold('\n✅ Repository cloned successfully!\n'));
+    }
+    inquirer_2.FirstActions.printInquirer();
+};
+/**
  * Main function to handle git clone flow
  */
 const gitCloneFlow = async () => {
     console.log(chalk_1.default.magentaBright.bold('\n🚀 Git Clone - Repository Browser\n'));
-    // Authenticate with GitHub
+    // Ask user to choose between authenticated browsing or manual URL
+    const { cloneMethod } = await inquirer_1.default.prompt([
+        {
+            type: 'list',
+            name: 'cloneMethod',
+            message: chalk_1.default.cyanBright('How would you like to clone a repository?'),
+            choices: [
+                { name: chalk_1.default.greenBright('📦 Enter repository URL (no authentication required)'), value: 'manual' },
+                { name: chalk_1.default.blueBright('🔍 Browse my repositories (requires GitHub authentication)'), value: 'browse' },
+                { name: chalk_1.default.red('← Back to main menu'), value: 'back' }
+            ]
+        }
+    ]);
+    if (cloneMethod === 'back') {
+        inquirer_2.FirstActions.printInquirer();
+        return;
+    }
+    if (cloneMethod === 'manual') {
+        await manualCloneFlow();
+        return;
+    }
+    // Authenticate with GitHub for browsing
     const octokit = await (0, github_1.authenticateGitHub)();
     if (!octokit) {
         console.log(chalk_1.default.red('Authentication failed. Returning to main menu...'));

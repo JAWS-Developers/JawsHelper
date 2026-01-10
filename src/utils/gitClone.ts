@@ -89,12 +89,116 @@ const cloneRepository = async (repo: Repository, method: string, destination: st
 };
 
 /**
+ * Clone from URL without authentication
+ * @param {string} url
+ * @param {string} destination
+ * @returns {Promise<boolean>}
+ */
+const cloneFromUrl = async (url: string, destination: string): Promise<boolean> => {
+    const spinner = ora(chalk.yellow(`Cloning repository...`)).start();
+    
+    try {
+        await execPromise(`git clone ${url} ${destination}`);
+        spinner.succeed(chalk.green(`Successfully cloned repository to ${destination}`));
+        return true;
+    } catch (error: any) {
+        spinner.fail(chalk.red(`Failed to clone repository`));
+        console.error(chalk.red(error.message));
+        return false;
+    }
+};
+
+/**
+ * Handle manual URL clone flow
+ */
+const manualCloneFlow = async (): Promise<void> => {
+    const { repoUrl } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'repoUrl',
+            message: chalk.greenBright('Enter repository URL (HTTPS or SSH):'),
+            validate: (input: string) => {
+                if (!input || input.trim().length === 0) {
+                    return 'URL cannot be empty';
+                }
+                // Basic validation for git URLs
+                if (!input.includes('github.com') && !input.includes('git@')) {
+                    return 'Please enter a valid Git URL';
+                }
+                return true;
+            }
+        }
+    ]);
+
+    // Extract repo name from URL for default destination
+    const urlParts = repoUrl.trim().split('/');
+    const repoNameWithGit = urlParts[urlParts.length - 1];
+    const repoName = repoNameWithGit.replace('.git', '');
+
+    const { destination } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'destination',
+            message: chalk.greenBright('Enter destination directory (or press Enter for current directory):'),
+            default: `./${repoName}`
+        }
+    ]);
+
+    const { confirm } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'confirm',
+            message: chalk.yellowBright(`Clone repository to ${chalk.cyan(destination)}?`),
+            default: true
+        }
+    ]);
+
+    if (!confirm) {
+        console.log(chalk.yellow('Clone cancelled.'));
+        FirstActions.printInquirer();
+        return;
+    }
+
+    const success = await cloneFromUrl(repoUrl.trim(), destination);
+
+    if (success) {
+        console.log(chalk.green.bold('\n✅ Repository cloned successfully!\n'));
+    }
+
+    FirstActions.printInquirer();
+};
+
+/**
  * Main function to handle git clone flow
  */
 export const gitCloneFlow = async (): Promise<void> => {
     console.log(chalk.magentaBright.bold('\n🚀 Git Clone - Repository Browser\n'));
     
-    // Authenticate with GitHub
+    // Ask user to choose between authenticated browsing or manual URL
+    const { cloneMethod } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'cloneMethod',
+            message: chalk.cyanBright('How would you like to clone a repository?'),
+            choices: [
+                { name: chalk.greenBright('📦 Enter repository URL (no authentication required)'), value: 'manual' },
+                { name: chalk.blueBright('🔍 Browse my repositories (requires GitHub authentication)'), value: 'browse' },
+                { name: chalk.red('← Back to main menu'), value: 'back' }
+            ]
+        }
+    ]);
+
+    if (cloneMethod === 'back') {
+        FirstActions.printInquirer();
+        return;
+    }
+
+    if (cloneMethod === 'manual') {
+        await manualCloneFlow();
+        return;
+    }
+
+    // Authenticate with GitHub for browsing
     const octokit = await authenticateGitHub();
     
     if (!octokit) {
