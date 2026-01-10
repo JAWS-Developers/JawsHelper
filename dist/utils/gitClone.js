@@ -108,9 +108,11 @@ const manualCloneFlow = async () => {
                 if (!input || input.trim().length === 0) {
                     return 'URL cannot be empty';
                 }
-                // Basic validation for git URLs
-                if (!input.includes('github.com') && !input.includes('git@')) {
-                    return 'Please enter a valid Git URL';
+                // Validate proper git URL format
+                const httpsPattern = /^https:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/;
+                const sshPattern = /^git@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}:.*$/;
+                if (!httpsPattern.test(input) && !sshPattern.test(input)) {
+                    return 'Please enter a valid Git URL (HTTPS or SSH format)';
                 }
                 return true;
             }
