@@ -5,10 +5,15 @@ import chalk from "chalk";
 import { log } from "console";
 import { writeCopy } from "./utils/copyright";
 import { verifyNodeModules } from "./utils/node_modules";
+import { gitCloneFlow } from "./utils/gitClone";
 
 
 export class FirstActions {
     private static actions: FirstActionType[] = [
+        {
+            label: chalk.greenBright("Git clone 📦"),
+            action: gitCloneFlow
+        },
         {
             label: chalk.greenBright("Create new release 🚀"),
             action: createNewRelease
