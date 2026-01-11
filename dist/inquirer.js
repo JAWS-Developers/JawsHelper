@@ -10,47 +10,59 @@ const chalk_1 = __importDefault(require("chalk"));
 const console_1 = require("console");
 const copyright_1 = require("./utils/copyright");
 const node_modules_1 = require("./utils/node_modules");
+const gitClone_1 = require("./utils/gitClone");
 class FirstActions {
-    static getLabels() {
-        return this.actions.map(item => item.label);
+    static actions = [
+        {
+            label: chalk_1.default.greenBright("Git clone 📦"),
+            action: gitClone_1.gitCloneFlow,
+            requiresFullSetup: false
+        },
+        {
+            label: chalk_1.default.greenBright("Create new release 🚀"),
+            action: release_1.createNewRelease,
+            requiresFullSetup: true
+        },
+        {
+            label: chalk_1.default.greenBright("Write copyright ©️"),
+            action: copyright_1.writeCopy,
+            requiresFullSetup: true
+        },
+        {
+            label: chalk_1.default.greenBright("Verify node_modules📝"),
+            action: node_modules_1.verifyNodeModules,
+            requiresFullSetup: true
+        },
+        {
+            label: chalk_1.default.greenBright("Exit 👋"),
+            action: () => process.exit(0),
+            requiresFullSetup: false
+        },
+    ];
+    static getLabels(isFullyConfigured = true) {
+        return this.actions
+            .filter(action => !action.requiresFullSetup || isFullyConfigured)
+            .map(item => item.label);
     }
-    static getActions() {
-        return this.actions;
+    static getActions(isFullyConfigured = true) {
+        return this.actions.filter(action => !action.requiresFullSetup || isFullyConfigured);
     }
-    static printInquirer() {
+    static printInquirer(isFullyConfigured = true) {
         inquirer_1.default.prompt([
             {
                 type: 'list',
                 name: 'action',
                 message: chalk_1.default.cyanBright("What do you want to do❓ 🤔"),
-                choices: FirstActions.getLabels(),
+                choices: FirstActions.getLabels(isFullyConfigured),
             }
         ]).then(data => {
-            const selectedAction = FirstActions.getActions().filter(action => action.label === data.action)[0];
+            const selectedAction = FirstActions.getActions(isFullyConfigured).filter(action => action.label === data.action)[0];
             (0, console_1.log)(chalk_1.default.magentaBright(`You selected: ${selectedAction.label}`));
             selectedAction.action();
         });
     }
 }
 exports.FirstActions = FirstActions;
-FirstActions.actions = [
-    {
-        label: chalk_1.default.greenBright("Create new release 🚀"),
-        action: release_1.createNewRelease
-    },
-    {
-        label: chalk_1.default.greenBright("Write copyright ©️"),
-        action: copyright_1.writeCopy
-    },
-    {
-        label: chalk_1.default.greenBright("Verify node_modules📝"),
-        action: node_modules_1.verifyNodeModules
-    },
-    {
-        label: chalk_1.default.greenBright("Exit 👋"),
-        action: () => process.exit(0)
-    },
-];
 class ReleaseManager {
     static async askReleaseType() {
         return await inquirer_1.default.prompt([

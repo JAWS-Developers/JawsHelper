@@ -6,9 +6,9 @@ import ora from 'ora';
  * Check if Git is installed
  * @returns {Promise<boolean>}
  */
-const checkGitInstalled = () => {
+const checkGitInstalled = (): Promise<boolean> => {
     const spinner = ora(chalk.yellow('Checking if Git is installed...')).start();
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
         exec('git --version', (error, stdout, stderr) => {
             if (error) {
                 spinner.fail('Git is not installed or not found in PATH');
@@ -25,9 +25,9 @@ const checkGitInstalled = () => {
  * Check if the user is logged into Git
  * @returns {Promise<boolean>}
  */
-const checkGitLogin = () => {
+const checkGitLogin = (): Promise<boolean> => {
     const spinner = ora(chalk.yellow('Checking if the user is logged into Git...')).start();
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
         exec('git config --get user.name', (error, stdout, stderr) => {
             if (error || !stdout.trim()) {
                 spinner.fail('User is not logged into Git');
@@ -44,9 +44,9 @@ const checkGitLogin = () => {
  * Check if the Git repository is configured
  * @returns {Promise<boolean>}
  */
-const checkGitHub = () => {
+const checkGitHub = (): Promise<boolean> => {
     const gitSpinner = ora(chalk.yellow('Checking for Git repository...')).start();
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
         exec('git status', (error, stdout, stderr) => {
             if (error) {
                 const errorMessage = error.toString();
@@ -68,9 +68,9 @@ const checkGitHub = () => {
  * Check if the Git working directory is clean
  * @returns {Promise<boolean>}
  */
-const checkGitClean = () => {
+const checkGitClean = (): Promise<boolean> => {
     const spinner = ora(chalk.yellow('Checking if Git working directory is clean...')).start();
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
         exec('git status --porcelain', (error, stdout, stderr) => {
             if (error) {
                 spinner.fail(`Error checking Git status: ${error.message}`);
@@ -87,9 +87,9 @@ const checkGitClean = () => {
  * Commit changes if Git working directory is not clean
  * @returns {Promise<void>}
  */
-const commitChanges = () => {
+const commitChanges = (): Promise<boolean> => {
     const spinner = ora(chalk.yellow('Committing changes...')).start();
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
         exec('git add . && git commit -m "Committing changes before version update"', (error, stdout, stderr) => {
             if (error) {
                 spinner.fail(`Error committing changes: ${error.message}`);
