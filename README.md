@@ -28,18 +28,22 @@ Clona repository GitHub (pubblici e privati) con due modalità:
 - Non richiede token GitHub
 
 **Modalità 2: Sfoglia repository (con autenticazione)**
-- Autenticazione con GitHub Personal Access Token
+- **Opzione A: GitHub CLI (consigliato)** 🔑
+  - Usa `gh auth login` per autenticarti
+  - Il tool utilizza automaticamente le credenziali di GitHub CLI
+  - Più sicuro e conveniente - usato da tutti
+  
+- **Opzione B: Token Manuale** 🔐
+  - Inserisci un GitHub Personal Access Token manualmente
+  - Crea un token su https://github.com/settings/tokens
+  - Scopes richiesti: `repo`, `read:org`
+  - Il token viene salvato in `~/.jaws-helper/github-token`
+
+**Funzionalità:**
 - Visualizza tutti i repository dell'utente e delle organizzazioni
 - Supporta repository privati
 - Supporta sia clonazione HTTPS che SSH
 - Selezione interattiva dei repository
-
-**Primo utilizzo (solo per Modalità 2):**
-1. Seleziona "Git clone" dal menu principale
-2. Scegli "Browse my repositories"
-3. Inserisci il tuo GitHub Personal Access Token (crealo su https://github.com/settings/tokens)
-4. Scopes richiesti: `repo`, `read:org`
-5. Il token verrà salvato in modo sicuro in `~/.jaws-helper/github-token`
 
 ### 🚀 Create new release
 Crea una nuova release del progetto con gestione automatica della versione.
