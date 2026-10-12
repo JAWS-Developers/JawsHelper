@@ -1,35 +1,64 @@
-name: Publish to npm
+name: Publish package
 
 on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run tests
+        run: npm test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - name: Check whether package version is unpublished
-        id: version
-        run: |
-          PACKAGE=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          if npm view "$PACKAGE@$VERSION" version >/dev/null 2>&1; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Publish package
-        if: steps.version.outputs.publish == 'true'
-        run: npm publish --access public --provenance
+
+      - name: Install npm with trusted publishing support
+        run: npm install --global npm@11.21.0
+
+      - name: Set publish version
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const packageJsonPath = path.join(process.cwd(), 'package.json');
+          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+          const [major = '1', minor = '0'] = String(packageJson.version).split('.');
+          packageJson.version = `${major}.${minor}.${process.env.GITHUB_RUN_NUMBER}`;
+          fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+          NODE
+
+      - name: Publish package
+        run: npm publish --provenance --access public --tag latest
