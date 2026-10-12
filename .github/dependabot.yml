@@ -1,0 +1,53 @@
+version: 2
+
+updates:
+  # Dipendenze npm del pacchetto
+  - package-ecosystem: "npm"
+    directory: "/"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Zurich"
+
+    open-pull-requests-limit: 5
+
+    # Il progetto è una libreria: mantiene compatibili
+    # la versione attuale e quella aggiornata quando possibile
+    versioning-strategy: "widen"
+
+    labels:
+      - "dependencies"
+      - "npm"
+
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Aggiorna le GitHub Actions usate dal progetto
+  - package-ecosystem: "github-actions"
+    directory: "/"
+
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "06:30"
+      timezone: "Europe/Zurich"
+
+    open-pull-requests-limit: 5
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"
