@@ -7,8 +7,10 @@ Uno strumento utile per semplificare lo sviluppo di progetti con JAWS Developers
 Per installare **JAWS Helpers** come dipendenza di sviluppo nel tuo progetto, esegui il seguente comando:
 
 ```bash
-npm install --save-dev jaws-helper
+npm install --save-dev @jaws-developers/jaws-helper
 ```
+
+Per pubblicare automaticamente su npm a ogni push su `master`, configura nel repository il secret `NPM_TOKEN` con accesso di pubblicazione per l'organizzazione. La workflow pubblica solo versioni non ancora presenti su npm, quindi aggiorna `version` in `package.json` per ogni release.
 
 ## 🚀 Utilizzo
 
