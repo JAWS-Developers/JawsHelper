@@ -8,6 +8,22 @@ const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = require("./inquirer");
 const project_1 = require("./utils/project");
 const helper_1 = require("./utils/helper");
+const { version } = require("../package.json");
+const args = process.argv.slice(2);
+if (args.includes("--version") || args.includes("-v")) {
+    console.log(version);
+    process.exit(0);
+}
+if (args.includes("--help") || args.includes("-h")) {
+    console.log(`JAWS Helper v${version}
+
+Usage: jaws-helper [option]
+
+Options:
+  -h, --help     Show this help message
+  -v, --version  Show the installed version`);
+    process.exit(0);
+}
 // Fancy ASCII Art Title
 const title = `
        ██╗  █████╗ ██╗    ██╗███████╗
@@ -21,7 +37,7 @@ console.log(chalk_1.default.blueBright.bold(title));
 // Add some dynamic styled messages
 console.log(chalk_1.default.greenBright("🌊 Welcome to ") +
     chalk_1.default.bold.underline("JAWS Helper") +
-    chalk_1.default.greenBright("! 🚀"));
+    chalk_1.default.greenBright(` v${version}! 🚀`));
 console.log(chalk_1.default.yellow("Preparing your environment...") +
     chalk_1.default.yellow.bold(" Please wait."));
 process.on('uncaughtException', (error) => {
