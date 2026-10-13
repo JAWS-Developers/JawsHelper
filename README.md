@@ -19,6 +19,12 @@ Esegui il comando:
 jaws-helper
 ```
 
+Per visualizzare la versione installata o la guida rapida:
+```bash
+jaws-helper --version
+jaws-helper --help
+```
+
 ## ✨ Funzionalità
 
 ### 🔐 Git Clone

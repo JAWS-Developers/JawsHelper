@@ -5,6 +5,25 @@ import { FirstActions } from "./inquirer";
 import { AnalyzeFolder } from "./utils/project";
 import { cancelByUser } from "./utils/helper";
 
+const { version } = require("../package.json") as { version: string };
+const args = process.argv.slice(2);
+
+if (args.includes("--version") || args.includes("-v")) {
+  console.log(version);
+  process.exit(0);
+}
+
+if (args.includes("--help") || args.includes("-h")) {
+  console.log(`JAWS Helper v${version}
+
+Usage: jaws-helper [option]
+
+Options:
+  -h, --help     Show this help message
+  -v, --version  Show the installed version`);
+  process.exit(0);
+}
+
 // Fancy ASCII Art Title
 const title = `
        ██╗  █████╗ ██╗    ██╗███████╗
@@ -21,7 +40,7 @@ console.log(chalk.blueBright.bold(title));
 console.log(
   chalk.greenBright("🌊 Welcome to ") +
   chalk.bold.underline("JAWS Helper") +
-  chalk.greenBright("! 🚀")
+  chalk.greenBright(` v${version}! 🚀`)
 );
 console.log(
   chalk.yellow("Preparing your environment...") +
@@ -47,5 +66,4 @@ AnalyzeFolder().then(({ isGitConfigured, isNodeProject, isUserLoggedIn }) => {
 
   FirstActions.printInquirer(isFullyConfigured);
 })
-
 
