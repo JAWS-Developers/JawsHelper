@@ -1,9 +1,9 @@
 version: 2
 
 updates:
-  # Dipendenze npm del pacchetto
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "deps/bump"
 
     schedule:
       interval: "weekly"
@@ -12,10 +12,6 @@ updates:
       timezone: "Europe/Zurich"
 
     open-pull-requests-limit: 5
-
-    # Il progetto è una libreria: mantiene compatibili
-    # la versione attuale e quella aggiornata quando possibile
-    versioning-strategy: "widen"
 
     labels:
       - "dependencies"
@@ -27,14 +23,15 @@ updates:
 
     groups:
       development-dependencies:
+        applies-to: version-updates
         dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
 
-  # Aggiorna le GitHub Actions usate dal progetto
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "deps/bump"
 
     schedule:
       interval: "monthly"
