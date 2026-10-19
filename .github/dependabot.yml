@@ -3,27 +3,21 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    target-branch: "deps/bump"
-
     schedule:
       interval: "weekly"
       day: "monday"
       time: "06:00"
       timezone: "Europe/Zurich"
-
     open-pull-requests-limit: 5
-
     labels:
       - "dependencies"
       - "npm"
-
     commit-message:
       prefix: "deps"
       include: "scope"
 
     groups:
       development-dependencies:
-        applies-to: version-updates
         dependency-type: "development"
         update-types:
           - "minor"
@@ -31,20 +25,15 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "deps/bump"
-
     schedule:
       interval: "monthly"
       day: "monday"
       time: "06:30"
       timezone: "Europe/Zurich"
-
     open-pull-requests-limit: 5
-
     labels:
       - "dependencies"
       - "github-actions"
-
     commit-message:
       prefix: "ci"
       include: "scope"

@@ -1,0 +1,38 @@
+name: Retarget Dependabot PRs to deps/bump
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  retarget:
+    if: >
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Change base branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          branches=$(gh api \
+            "/repos/${{ github.repository }}/branches" \
+            --paginate --jq '.[].name')
+          if ! grep -Fxq 'deps/bump' <<< "$branches"; then
+            echo "::notice::Skipping retarget: deps/bump does not exist; keeping the current base branch."
+            exit 0
+          fi
+
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
+            -f base="deps/bump"

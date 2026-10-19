@@ -1,0 +1,163 @@
+name: CI and Release
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+  lint-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint tests
+        run: npm run lint:test
+
+  build-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build check
+        run: npm run build
+
+  create-release:
+    if: github.event_name == 'push'
+    needs: [test, lint-tests, build-check]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package build artifact
+        run: zip -r dist.zip dist
+
+      - name: Create GitHub release with build
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            const fs = require('node:fs');
+            const branch = context.ref.replace('refs/heads/', '');
+            const shortSha = context.sha.substring(0, 7);
+            const isPrerelease = branch === 'dev';
+            const tag = `${isPrerelease ? 'prerelease-dev' : 'release'}-${shortSha}`;
+            const releaseName = `${isPrerelease ? 'Prerelease' : 'Release'} ${shortSha}`;
+            const releaseBody = `Automatic ${isPrerelease ? 'prerelease' : 'release'} generated from branch ${branch}.`;
+
+            let release;
+            try {
+              const created = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                target_commitish: context.sha,
+                name: releaseName,
+                body: releaseBody,
+                draft: false,
+                prerelease: isPrerelease
+              });
+              release = created.data;
+            } catch (error) {
+              if (error.status !== 422) {
+                core.error(`Failed to create release for ${branch}: ${error.message}`);
+                throw error;
+              }
+              try {
+                const existing = await github.rest.repos.getReleaseByTag({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag
+                });
+                release = existing.data;
+              } catch (lookupError) {
+                core.error(`Release lookup failed for tag ${tag}: ${lookupError.message}`);
+                throw lookupError;
+              }
+            }
+
+            const existingAssets = await github.rest.repos.listReleaseAssets({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id
+            });
+
+            for (const asset of existingAssets.data) {
+              if (asset.name === 'dist.zip') {
+                await github.rest.repos.deleteReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  asset_id: asset.id
+                });
+              }
+            }
+
+            const data = fs.readFileSync('dist.zip');
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              name: 'dist.zip',
+              data
+            });
