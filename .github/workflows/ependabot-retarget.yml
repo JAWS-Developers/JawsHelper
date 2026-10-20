@@ -1,4 +1,4 @@
-name: Retarget Dependabot PRs to deps/bump
+name: Retarget Dependabot PRs to daily deps/bump branch
 
 on:
   pull_request_target:
@@ -7,7 +7,7 @@ on:
       - reopened
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -18,21 +18,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Change base branch
+      - name: Create or resolve daily deps/bump branch
+        id: branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.DEPENDABOT_REBASE }}
+          REPO: ${{ github.repository }}
         run: |
-          branches=$(gh api \
-            "/repos/${{ github.repository }}/branches" \
-            --paginate --jq '.[].name')
-          if ! grep -Fxq 'deps/bump' <<< "$branches"; then
-            echo "::notice::Skipping retarget: deps/bump does not exist; keeping the current base branch."
-            exit 0
+          set -euo pipefail
+
+          base_branch="master"
+          target_branch="deps/bump/$(date -u +%Y%m%d)"
+
+          # SHA corrente di master
+          base_sha=$(gh api \
+            "/repos/${REPO}/git/ref/heads/${base_branch}" \
+            --jq '.object.sha')
+
+          # Se il branch giornaliero esiste già, riusalo
+          if gh api \
+            "/repos/${REPO}/git/ref/heads/${target_branch}" >/dev/null 2>&1; then
+            echo "::notice::Branch ${target_branch} already exists."
+          else
+            echo "::notice::Creating branch ${target_branch} from ${base_branch} (${base_sha})."
+
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${REPO}/git/refs" \
+              -f ref="refs/heads/${target_branch}" \
+              -f sha="${base_sha}"
           fi
 
+          echo "branch=${target_branch}" >> "$GITHUB_OUTPUT"
+
+      - name: Change Dependabot PR base branch
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_REBASE }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
           gh api \
             --method PATCH \
             -H "Accept: application/vnd.github+json" \
             "/repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
-            -f base="deps/bump"
+            -f base="${TARGET_BRANCH}"
