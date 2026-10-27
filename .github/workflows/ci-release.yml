@@ -47,7 +47,7 @@ jobs:
         run: npm ci
 
       - name: Lint tests
-        run: npm run lint:test
+        run: npm test
 
   build-check:
     runs-on: ubuntu-latest
